@@ -46,20 +46,20 @@ import java.io.OutputStream;
  */
 public class Patch {
 
-    private Patch() { }
+    private Patch() {
+    }
 
     /**
      * Using an old file and its accompanying patch, this method generates a new
      * (updated) file and writes it to an {@link OutputStream}.
      *
-     * @param old    the original ('old') state of the binary
-     * @param patch  a binary patch file to apply to the old state
-     * @param out    an {@link OutputStream} to write the patched binary to
-     *
-     * @throws CompressorException when a compression error occurs.
+     * @param old   the original ('old') state of the binary
+     * @param patch a binary patch file to apply to the old state
+     * @param out   an {@link OutputStream} to write the patched binary to
+     * @throws CompressorException    when a compression error occurs.
      * @throws InvalidHeaderException when the bsdiff header is malformed or not
-     *     present.
-     * @throws IOException when an I/O error occurs
+     *                                present.
+     * @throws IOException            when an I/O error occurs
      */
     public static void patch(byte[] old, byte[] patch, OutputStream out)
             throws CompressorException, InvalidHeaderException, IOException {
@@ -80,12 +80,6 @@ public class Patch {
             dataIn.skip(Header.HEADER_SIZE + header.getControlLength());
             extraIn.skip(Header.HEADER_SIZE + header.getControlLength() +
                     header.getDiffLength());
-
-            /* Set up compressed streams */
-            CompressorStreamFactory compressor = new CompressorStreamFactory();
-            controlIn = compressor.createCompressorInputStream(controlIn);
-            dataIn = compressor.createCompressorInputStream(dataIn);
-            extraIn = compressor.createCompressorInputStream(extraIn);
 
             /* Start patching */
             int newPointer = 0, oldPointer = 0;
@@ -142,12 +136,6 @@ public class Patch {
             dataIn.skip(Header.HEADER_SIZE + header.getControlLength());
             extraIn.skip(Header.HEADER_SIZE + header.getControlLength() +
                     header.getDiffLength());
-
-            /* Set up compressed streams */
-            CompressorStreamFactory compressor = new CompressorStreamFactory();
-            controlIn = compressor.createCompressorInputStream(controlIn);
-            dataIn = compressor.createCompressorInputStream(dataIn);
-            extraIn = compressor.createCompressorInputStream(extraIn);
 
             FileInputStream oldStream = new FileInputStream(oldFile);
             byte[] old = new byte[(int) oldFile.length()];
@@ -206,7 +194,6 @@ public class Patch {
      * @param dest byte array to read data into
      * @param off  offset in dest to write data at
      * @param len  length of the read
-     *
      * @throws IOException when fewer bytes were read than requested
      */
     private static void read(InputStream in, byte[] dest, int off, int len)

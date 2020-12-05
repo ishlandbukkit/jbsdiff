@@ -6,7 +6,7 @@
 
     <groupId>io.sigpipe</groupId>
     <artifactId>jbsdiff</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -45,7 +45,7 @@
     </scm>
 
     <properties>
-        <jdk.version>1.6</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <app.main.class>io.sigpipe.jbsdiff.ui.CLI</app.main.class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.19</version>
+            <version>1.20</version>
         </dependency>
     </dependencies>
 

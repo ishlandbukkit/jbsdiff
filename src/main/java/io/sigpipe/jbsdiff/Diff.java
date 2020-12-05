@@ -28,6 +28,7 @@ package io.sigpipe.jbsdiff;
 import io.sigpipe.jbsdiff.sort.SearchResult;
 import io.sigpipe.jbsdiff.sort.SuffixSort;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -57,14 +58,13 @@ public class Diff {
      *                        to create a patch file
      * @param out         An {@link OutputStream} to write the patch file to
      *
-     * @throws CompressorException when a compression error occurs.
      * @throws InvalidHeaderException when the bsdiff header is malformed or not
      *     present.
      * @throws IOException when an error occurs writing the bsdiff control
      *     blocks.
      */
     public static void diff(byte[] oldBytes, byte[] newBytes, OutputStream out)
-            throws CompressorException, InvalidHeaderException, IOException {
+            throws InvalidHeaderException, IOException {
         diff(oldBytes, newBytes, out, new DefaultDiffSettings());
     }
 
@@ -80,7 +80,6 @@ public class Diff {
      *                        the compression and suffix sort algorithms to
      *                        create the patch with.
      *
-     * @throws CompressorException when a compression error occurs.
      * @throws InvalidHeaderException when the bsdiff header is malformed or not
      *     present.
      * @throws IOException when an error occurs writing the bsdiff control
@@ -88,15 +87,10 @@ public class Diff {
      */
     public static void diff(byte[] oldBytes, byte[] newBytes, OutputStream out,
                             DiffSettings settings)
-            throws CompressorException, InvalidHeaderException, IOException {
-        CompressorStreamFactory compressor = new CompressorStreamFactory();
-        String compression = settings.getCompression();
-
+            throws InvalidHeaderException, IOException {
         int[] I = settings.sort(oldBytes);
 
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        OutputStream patchOut =
-                compressor.createCompressorOutputStream(compression, byteOut);
 
         SearchResult result = null;
         int scan = 0, len = 0, position = 0;
@@ -209,7 +203,7 @@ public class Diff {
                 control.setExtraLength((scan - lenb) - (lastScan + lenf));
                 control.setSeekLength((position - lenb) -
                         (lastPos + lenf));
-                control.write(patchOut);
+                control.write(byteOut);
 
                 lastScan = scan - lenb;
                 lastPos = position - lenb;
@@ -218,21 +212,13 @@ public class Diff {
         }
 
         /* Done writing control blocks */
-        patchOut.close();
 
         Header header = new Header();
         header.setControlLength(byteOut.size());
 
-        patchOut =
-                compressor.createCompressorOutputStream(compression, byteOut);
-        patchOut.write(db);
-        patchOut.close();
+        byteOut.write(db);
         header.setDiffLength(byteOut.size() - header.getControlLength());
-
-        patchOut =
-                compressor.createCompressorOutputStream(compression, byteOut);
-        patchOut.write(eb);
-        patchOut.close();
+        byteOut.write(eb);
 
         header.setOutputLength(newBytes.length);
 
